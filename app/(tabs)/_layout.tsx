@@ -1,50 +1,51 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from "expo-router";
+import { Calendar, User, UserCheck } from "lucide-react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarStyle: {
+          backgroundColor: "#ffffff",
+          borderTopWidth: 1,
+          borderTopColor: "#f1f5f9",
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 80,
+        },
+        tabBarActiveTintColor: "#3b82f6",
+        tabBarInactiveTintColor: "#64748b",
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontFamily: "Inter-Medium",
+          marginTop: 4,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Training Slots",
+          tabBarIcon: ({ size, color }) => (
+            <Calendar size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="bookings"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "My Bookings",
+          tabBarIcon: ({ size, color }) => (
+            <UserCheck size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>
