@@ -43,13 +43,6 @@ export default function LoginScreen() {
     }, 500);
   };
 
-  const demoUsers = [
-    { username: "john", name: "John Doe", role: "Trainee" },
-    { username: "alex", name: "Alex Thompson", role: "Trainee" },
-    { username: "sarah", name: "Sarah Johnson", role: "Trainer" },
-    { username: "mike", name: "Mike Wilson", role: "Trainer" },
-  ];
-
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
@@ -109,6 +102,8 @@ export default function LoginScreen() {
               </LinearGradient>
             </TouchableOpacity>
           </View>
+
+          <Text className="text-xl font-bold text-blue-500">Mike</Text>
 
           {/* <View style={styles.demoContainer}>
             <Text style={styles.demoTitle}>Demo Users</Text>
