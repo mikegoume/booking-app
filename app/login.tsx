@@ -102,45 +102,6 @@ export default function LoginScreen() {
               </LinearGradient>
             </TouchableOpacity>
           </View>
-
-          <Text className="text-xl font-bold text-blue-500">Mike</Text>
-
-          {/* <View style={styles.demoContainer}>
-            <Text style={styles.demoTitle}>Demo Users</Text>
-            <Text style={styles.demoSubtitle}>Try any of these usernames:</Text>
-
-            <View style={styles.demoGrid}>
-              {demoUsers.map((user) => (
-                <TouchableOpacity
-                  key={user.username}
-                  style={styles.demoCard}
-                  onPress={() => setUsername(user.username)}
-                >
-                  <Text style={styles.demoUsername}>{user.username}</Text>
-                  <Text style={styles.demoName}>{user.name}</Text>
-                  <View
-                    style={[
-                      styles.demoRole,
-                      user.role === "Trainer"
-                        ? styles.demoRoleTrainer
-                        : styles.demoRoleTrainee,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.demoRoleText,
-                        user.role === "Trainer"
-                          ? styles.demoRoleTextTrainer
-                          : styles.demoRoleTextTrainee,
-                      ]}
-                    >
-                      {user.role}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View> */}
         </View>
       </KeyboardAvoidingView>
     </View>

@@ -1,5 +1,7 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
-import { Calendar, User, UserCheck } from "lucide-react-native";
+import { Calendar, MessageCircle, User, UserCheck } from "lucide-react-native";
+import { TouchableWithoutFeedback, View } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -26,7 +28,24 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          headerShown: true,
+          headerRight: () => (
+            <View className="pr-4">
+              <TouchableWithoutFeedback>
+                <MessageCircle size={20} color={"white"} />
+              </TouchableWithoutFeedback>
+            </View>
+          ),
+          headerBackground: () => (
+            <LinearGradient
+              colors={["#4f46e5", "#7c3aed"]} // Your desired gradient colors
+              style={{ flex: 1 }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          ),
           title: "Training Slots",
+          headerTintColor: "#ffffff",
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
           ),

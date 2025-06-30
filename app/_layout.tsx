@@ -1,4 +1,5 @@
 import { AppProvider } from "@/contexts/AppContext";
+import ThemeProvider from "@/contexts/ThemeContext";
 import "@/global.css";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 import {
@@ -36,12 +37,14 @@ export default function RootLayout() {
 
   return (
     <AppProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      <ThemeProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="login" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
     </AppProvider>
   );
 }
