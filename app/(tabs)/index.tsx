@@ -59,34 +59,31 @@ export default function TrainingSlotsScreen() {
   console.log("selectedDate: ", selectedDate);
 
   return (
-    <CalendarPicker
-      selectedDate={selectedDate}
-      handleSelectDate={handleSelectDate}
-    >
-      <View className="flex-1">
-        <FlashList
-          ListEmptyComponent={() => (
-            <View style={styles.emptyState}>
-              <CalendarIcon size={64} color="#94a3b8" />
-              <Text style={styles.emptyStateTitle}>
-                {user?.role === "trainer"
-                  ? "No slots created yet"
-                  : "No available slots"}
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                {user?.role === "trainer"
-                  ? "Create your first training slot to get started"
-                  : "Check back later for new training opportunities"}
-              </Text>
-            </View>
-          )}
-          contentContainerStyle={{ padding: 16 }}
-          data={filteredSlots}
-          renderItem={({ item }) => <TrainingSlotEvent slot={item} />}
-          estimatedItemSize={37}
-          showsVerticalScrollIndicator={false}
-        />
-        {/* <Modal
+    <View className="flex-1 flex flex-col">
+      <CalendarPicker />
+      <FlashList
+        ListEmptyComponent={() => (
+          <View style={styles.emptyState}>
+            <CalendarIcon size={64} color="#94a3b8" />
+            <Text style={styles.emptyStateTitle}>
+              {user?.role === "trainer"
+                ? "No slots created yet"
+                : "No available slots"}
+            </Text>
+            <Text style={styles.emptyStateSubtitle}>
+              {user?.role === "trainer"
+                ? "Create your first training slot to get started"
+                : "Check back later for new training opportunities"}
+            </Text>
+          </View>
+        )}
+        contentContainerStyle={{ padding: 16, paddingTop: 0 }}
+        data={filteredSlots}
+        renderItem={({ item }) => <TrainingSlotEvent slot={item} />}
+        estimatedItemSize={37}
+        showsVerticalScrollIndicator={false}
+      />
+      {/* <Modal
         visible={showCreateModal}
         animationType="slide"
         presentationStyle="pageSheet"
@@ -170,8 +167,7 @@ export default function TrainingSlotsScreen() {
           </ScrollView>
         </View>
       </Modal> */}
-      </View>
-    </CalendarPicker>
+    </View>
   );
 }
 
