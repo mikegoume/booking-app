@@ -1,16 +1,8 @@
 import { useApp } from "@/contexts/AppContext";
-import { LinearGradient } from "expo-linear-gradient";
+import { FlashList } from "@shopify/flash-list";
 import { Calendar as CalendarIcon, Clock, Users, X } from "lucide-react-native";
 import React from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function BookingsScreen() {
   const { user, bookings, cancelBooking } = useApp();
@@ -41,84 +33,74 @@ export default function BookingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient colors={["#059669", "#0d9488"]} style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>My Bookings</Text>
-          <Text style={styles.headerSubtitle}>
-            {userBookings.length} active booking
-            {userBookings.length !== 1 ? "s" : ""}
+    <FlashList
+      ListEmptyComponent={() => (
+        <View style={styles.emptyState}>
+          <CalendarIcon size={64} color="#94a3b8" />
+          <Text style={styles.emptyStateTitle}>No bookings yet</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Browse available training slots to make your first booking
           </Text>
         </View>
-      </LinearGradient>
-
-      <ScrollView
-        style={styles.bookingsContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {userBookings.length === 0 ? (
-          <View style={styles.emptyState}>
-            <CalendarIcon size={64} color="#94a3b8" />
-            <Text style={styles.emptyStateTitle}>No bookings yet</Text>
-            <Text style={styles.emptyStateSubtitle}>
-              Browse available training slots to make your first booking
-            </Text>
-          </View>
-        ) : (
-          userBookings.map((booking) => (
-            <View key={booking.id} style={styles.bookingCard}>
-              <View style={styles.bookingHeader}>
-                <View style={styles.bookingInfo}>
-                  <Text style={styles.bookingDate}>
-                    {new Date(booking.slot.date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </Text>
-                  <View style={styles.timeContainer}>
-                    <Clock size={16} color="#64748b" />
-                    <Text style={styles.bookingTime}>
-                      {booking.slot.startTime} - {booking.slot.endTime}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => handleCancelBooking(booking.id)}
-                >
-                  <X size={20} color="#ef4444" />
-                </TouchableOpacity>
-              </View>
-
-              {booking.slot.description && (
-                <Text style={styles.bookingDescription}>
-                  {booking.slot.description}
+      )}
+      contentContainerStyle={{ padding: 16, paddingTop: 0 }}
+      data={userBookings}
+      renderItem={({ item }) => {
+        return (
+          <View key={item.id} style={styles.bookingCard}>
+            <View style={styles.bookingHeader}>
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingDate}>
+                  {new Date(item.slot.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </Text>
-              )}
-
-              <View style={styles.bookingFooter}>
-                <Text style={styles.trainerName}>
-                  with {booking.slot.trainerName}
-                </Text>
-                <View style={styles.capacityContainer}>
-                  <Users size={16} color="#64748b" />
-                  <Text style={styles.capacityText}>
-                    {booking.slot.currentBookings}/{booking.slot.maxCapacity}
+                <View style={styles.timeContainer}>
+                  <Clock size={16} color="#64748b" />
+                  <Text style={styles.bookingTime}>
+                    {item.slot.startTime} - {item.slot.endTime}
                   </Text>
                 </View>
               </View>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => handleCancelBooking(item.id)}
+              >
+                <X size={20} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
 
-              <View style={styles.bookingMeta}>
-                <Text style={styles.bookedAt}>
-                  Booked on {new Date(booking.bookedAt).toLocaleDateString()}
+            {item.slot.description && (
+              <Text style={styles.bookingDescription}>
+                {item.slot.description}
+              </Text>
+            )}
+
+            <View style={styles.bookingFooter}>
+              <Text style={styles.trainerName}>
+                with {item.slot.trainerName}
+              </Text>
+              <View style={styles.capacityContainer}>
+                <Users size={16} color="#64748b" />
+                <Text style={styles.capacityText}>
+                  {item.slot.currentBookings}/{item.slot.maxCapacity}
                 </Text>
               </View>
             </View>
-          ))
-        )}
-      </ScrollView>
-    </SafeAreaView>
+
+            <View style={styles.bookingMeta}>
+              <Text style={styles.bookedAt}>
+                Booked on {new Date(item.bookedAt).toLocaleDateString()}
+              </Text>
+            </View>
+          </View>
+        );
+      }}
+      estimatedItemSize={37}
+      showsVerticalScrollIndicator={false}
+    />
   );
 }
 
@@ -131,25 +113,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  headerContent: {
-    paddingTop: 10,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontFamily: "Inter-Bold",
-    color: "#ffffff",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter-Medium",
-    color: "#ffffff",
-    opacity: 0.9,
-  },
-  bookingsContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
+
   emptyState: {
     alignItems: "center",
     justifyContent: "center",

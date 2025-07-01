@@ -54,7 +54,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="bookings"
         options={{
+          headerShown: true,
           title: "My Bookings",
+          headerTintColor: "#ffffff",
+          headerBackground: () => (
+            <LinearGradient
+              colors={["#059669", "#0d9488"]} // Your desired gradient colors
+              style={{ flex: 1 }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          ),
           tabBarIcon: ({ size, color }) => (
             <UserCheck size={size} color={color} />
           ),
