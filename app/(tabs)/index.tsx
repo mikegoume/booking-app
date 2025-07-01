@@ -3,25 +3,11 @@ import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
 import { useApp } from "@/contexts/AppContext";
 import { FlashList } from "@shopify/flash-list";
 import { CalendarIcon } from "lucide-react-native";
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function TrainingSlotsScreen() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  const { user, timeSlots, createTimeSlot } = useApp();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newSlot, setNewSlot] = useState({
-    date: "",
-    startTime: "",
-    endTime: "",
-    maxCapacity: "4",
-    description: "",
-  });
-
-  const handleSelectDate = (newDate: Date) => {
-    setSelectedDate(newDate);
-  };
+  const { user, timeSlots } = useApp();
 
   // const handleCreateSlot = () => {
   //   if (!user || user.role !== "trainer") return;
@@ -55,8 +41,6 @@ export default function TrainingSlotsScreen() {
     user?.role === "trainer"
       ? timeSlots.filter((slot) => slot.trainerId === user.id)
       : timeSlots;
-
-  console.log("selectedDate: ", selectedDate);
 
   return (
     <View className="flex-1 flex flex-col">
