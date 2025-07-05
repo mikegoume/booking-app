@@ -30,6 +30,15 @@ export interface Booking {
   status: "active" | "cancelled";
 }
 
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  text: string;
+  timestamp: string;
+}
+
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -37,6 +46,7 @@ interface AppContextType {
   setTimeSlots: React.Dispatch<React.SetStateAction<TimeSlot[]>>;
   bookings: Booking[];
   setBookings: React.Dispatch<React.SetStateAction<Booking[]>>;
+  chatMessages: ChatMessage[];
   createTimeSlot: (
     slot: Omit<TimeSlot, "id" | "currentBookings" | "bookedByIds">,
   ) => void;
@@ -45,6 +55,10 @@ interface AppContextType {
   login: (username: string) => boolean;
   logout: () => void;
   isAuthenticated: boolean;
+  getAllUsers: () => User[];
+  updateUserVisits: (userId: string, visits: number) => void;
+  getChatMessages: (userId1: string, userId2: string) => any[];
+  sendMessage: (senderId: string, receiverId: string, text: string) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -91,37 +105,38 @@ const mockUsers: Record<string, User> = {
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [users, setUsers] = useState<Record<string, User>>(mockUsers);
 
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
     {
       id: "1",
       trainerId: "2",
       trainerName: "Sarah Johnson",
-      date: "2025-07-02",
+      date: "2024-12-27",
       startTime: "09:00",
       endTime: "10:00",
       maxCapacity: 4,
-      currentBookings: 3,
-      bookedByIds: ["4", "5", "6"],
+      currentBookings: 2,
+      bookedByIds: ["4", "5"],
       description: "High-intensity interval training session",
     },
     {
       id: "2",
       trainerId: "2",
       trainerName: "Sarah Johnson",
-      date: "2025-07-02",
+      date: "2024-12-27",
       startTime: "11:00",
       endTime: "12:00",
       maxCapacity: 3,
-      currentBookings: 2,
-      bookedByIds: ["4", "7"],
+      currentBookings: 1,
+      bookedByIds: ["4"],
       description: "Strength training focused on upper body",
     },
     {
       id: "3",
       trainerId: "3",
       trainerName: "Mike Wilson",
-      date: "2025-07-03",
+      date: "2024-12-28",
       startTime: "08:00",
       endTime: "09:00",
       maxCapacity: 5,
@@ -133,37 +148,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: "4",
       trainerId: "3",
       trainerName: "Mike Wilson",
-      date: "2025-07-04",
+      date: "2024-12-29",
       startTime: "10:00",
       endTime: "11:00",
       maxCapacity: 4,
       currentBookings: 0,
       bookedByIds: [],
       description: "Core strengthening and balance training",
-    },
-    {
-      id: "5",
-      trainerId: "4",
-      trainerName: "Emily Chen",
-      date: "2025-07-05",
-      startTime: "07:00",
-      endTime: "08:00",
-      maxCapacity: 6,
-      currentBookings: 4,
-      bookedByIds: ["2", "3", "5", "8"],
-      description: "Sunrise yoga and meditation",
-    },
-    {
-      id: "6",
-      trainerId: "4",
-      trainerName: "Emily Chen",
-      date: "2025-07-06",
-      startTime: "17:00",
-      endTime: "18:00",
-      maxCapacity: 5,
-      currentBookings: 1,
-      bookedByIds: ["6"],
-      description: "Evening stretch and mobility class",
     },
   ]);
 
@@ -172,54 +163,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: "1",
       userId: "1",
       slotId: "3",
-      slot: timeSlots[2],
-      bookedAt: "2025-06-30T10:30:00Z",
+      slot: {
+        id: "3",
+        trainerId: "3",
+        trainerName: "Mike Wilson",
+        date: "2024-12-28",
+        startTime: "08:00",
+        endTime: "09:00",
+        maxCapacity: 5,
+        currentBookings: 2,
+        bookedByIds: ["1", "5"],
+        description: "Morning cardio and flexibility training",
+      },
+      bookedAt: "2024-12-26T10:30:00Z",
       status: "active",
     },
     {
       id: "2",
       userId: "4",
       slotId: "1",
-      slot: timeSlots[0],
-      bookedAt: "2025-06-30T14:15:00Z",
-      status: "active",
-    },
-    {
-      id: "3",
-      userId: "5",
-      slotId: "1",
-      slot: timeSlots[0],
-      bookedAt: "2025-06-30T14:30:00Z",
-      status: "active",
-    },
-    {
-      id: "4",
-      userId: "2",
-      slotId: "5",
-      slot: timeSlots[4],
-      bookedAt: "2025-07-01T07:00:00Z",
-      status: "active",
-    },
-    {
-      id: "5",
-      userId: "6",
-      slotId: "6",
-      slot: timeSlots[5],
-      bookedAt: "2025-07-01T08:00:00Z",
-      status: "active",
-    },
-    {
-      id: "6",
-      userId: "7",
-      slotId: "2",
-      slot: timeSlots[1],
-      bookedAt: "2025-07-01T08:30:00Z",
+      slot: {
+        id: "1",
+        trainerId: "2",
+        trainerName: "Sarah Johnson",
+        date: "2024-12-27",
+        startTime: "09:00",
+        endTime: "10:00",
+        maxCapacity: 4,
+        currentBookings: 2,
+        bookedByIds: ["4", "5"],
+        description: "High-intensity interval training session",
+      },
+      bookedAt: "2024-12-26T14:15:00Z",
       status: "active",
     },
   ]);
 
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: "1",
+      senderId: "2",
+      senderName: "Sarah Johnson",
+      receiverId: "4",
+      text: "Hi Emma! Looking forward to our training session tomorrow.",
+      timestamp: "2024-12-26T15:30:00Z",
+    },
+    {
+      id: "2",
+      senderId: "4",
+      senderName: "Emma Davis",
+      receiverId: "2",
+      text: "Hi Sarah! Me too! Should I bring anything specific?",
+      timestamp: "2024-12-26T15:35:00Z",
+    },
+    {
+      id: "3",
+      senderId: "2",
+      senderName: "Sarah Johnson",
+      receiverId: "4",
+      text: "Just bring a water bottle and a towel. We'll focus on upper body strength training.",
+      timestamp: "2024-12-26T15:40:00Z",
+    },
+  ]);
+
   const login = (username: string): boolean => {
-    const foundUser = mockUsers[username.toLowerCase()];
+    const foundUser = users[username.toLowerCase()];
     if (foundUser) {
       setUser(foundUser);
       setIsAuthenticated(true);
@@ -231,6 +239,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+  };
+
+  const getAllUsers = (): User[] => {
+    return Object.values(users);
+  };
+
+  const updateUserVisits = (userId: string, visits: number) => {
+    setUsers((prev) => ({
+      ...prev,
+      [Object.keys(prev).find((key) => prev[key].id === userId) || ""]: {
+        ...prev[Object.keys(prev).find((key) => prev[key].id === userId) || ""],
+        remainingVisits: visits,
+      },
+    }));
+
+    // Update current user if it's the same user
+    if (user && user.id === userId) {
+      setUser((prev) => (prev ? { ...prev, remainingVisits: visits } : null));
+    }
   };
 
   const createTimeSlot = (
@@ -281,6 +308,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) =>
       prev ? { ...prev, remainingVisits: prev.remainingVisits - 1 } : null,
     );
+    updateUserVisits(user.id, user.remainingVisits - 1);
 
     return true;
   };
@@ -309,10 +337,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Refund user's visit
     if (user && booking.userId === user.id) {
+      const newVisits = user.remainingVisits + 1;
       setUser((prev) =>
-        prev ? { ...prev, remainingVisits: prev.remainingVisits + 1 } : null,
+        prev ? { ...prev, remainingVisits: newVisits } : null,
       );
+      updateUserVisits(user.id, newVisits);
     }
+  };
+
+  const getChatMessages = (userId1: string, userId2: string) => {
+    const messages = chatMessages.filter(
+      (msg) =>
+        (msg.senderId === userId1 && msg.receiverId === userId2) ||
+        (msg.senderId === userId2 && msg.receiverId === userId1),
+    );
+
+    return messages
+      .map((msg) => ({
+        ...msg,
+        isCurrentUser: msg.senderId === userId1,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+  };
+
+  const sendMessage = (
+    senderId: string,
+    receiverId: string,
+    text: string,
+  ): boolean => {
+    const sender = getAllUsers().find((u) => u.id === senderId);
+    if (!sender) return false;
+
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      senderId,
+      senderName: sender.name,
+      receiverId,
+      text,
+      timestamp: new Date().toISOString(),
+    };
+
+    setChatMessages((prev) => [...prev, newMessage]);
+    return true;
   };
 
   return (
@@ -324,12 +393,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setTimeSlots,
         bookings,
         setBookings,
+        chatMessages,
         createTimeSlot,
         bookSlot,
         cancelBooking,
         login,
         logout,
         isAuthenticated,
+        getAllUsers,
+        updateUserVisits,
+        getChatMessages,
+        sendMessage,
       }}
     >
       {children}
