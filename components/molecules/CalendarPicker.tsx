@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,6 +10,11 @@ import {
 } from "react-native";
 
 const CalendarPicker = () => {
+  const scrollViewRef = useRef<ScrollView & { measure: any }>(null);
+  const itemRefs = useRef<(View | null)[]>([]);
+
+  const [scrollX, setScrollX] = useState(0);
+  const [scrollViewWidth, setScrollViewWidth] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Generate the next 7 days starting from today
@@ -43,11 +50,56 @@ const CalendarPicker = () => {
     return date.toDateString() === today.toDateString();
   };
 
+  // Scroll to element if out of view
+  const scrollToIndex = (index: number) => {
+    const scrollRef = scrollViewRef.current;
+    const selectedRef = itemRefs.current[index];
+
+    if (!scrollRef || !selectedRef) return;
+
+    selectedRef.measureLayout(
+      // Measure relative to ScrollView
+      scrollRef,
+      (left: number, top: number, width: number, height: number) => {
+        const visibleStart = scrollX;
+        const visibleEnd = scrollX + scrollViewWidth;
+
+        const elementStart = left;
+        const elementEnd = left + width;
+
+        if (elementStart < visibleStart) {
+          // Scroll left to show element start
+          scrollRef.scrollTo({ x: elementStart - 16, animated: true });
+        } else if (elementEnd > visibleEnd) {
+          // Scroll right to show element end
+          scrollRef.scrollTo({
+            x: elementEnd - scrollViewWidth + 16,
+            animated: true,
+          });
+        }
+      },
+      (error: unknown) => {
+        console.warn("measureLayout error:", error);
+      },
+    );
+  };
+
+  const handleDatePress = (date: Date, index: number) => {
+    setSelectedDate(date);
+    scrollToIndex(index);
+  };
+
   return (
     <ScrollView
       horizontal
+      ref={scrollViewRef}
       showsHorizontalScrollIndicator={false}
       style={styles.weekContainer}
+      onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) =>
+        setScrollX(e.nativeEvent.contentOffset.x)
+      }
+      onLayout={(e) => setScrollViewWidth(e.nativeEvent.layout.width)}
+      scrollEventThrottle={16}
     >
       {weekDays.map((date, index) => {
         const { day, month, weekday } = formatDate(date);
@@ -58,7 +110,9 @@ const CalendarPicker = () => {
           <TouchableOpacity
             key={index}
             style={[styles.dayButton, isSelected && styles.dayButtonSelected]}
-            onPress={() => setSelectedDate(date)}
+            onPress={() => handleDatePress(date, index)}
+            ref={(ref) => (itemRefs.current[index] = ref)}
+            activeOpacity={0.7}
           >
             <Text
               style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}
@@ -93,8 +147,9 @@ const CalendarPicker = () => {
 const styles = StyleSheet.create({
   weekContainer: {
     maxHeight: 100,
-    padding: 16,
-    paddingBottom: 0,
+    paddingTop: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   dayButton: {
     flexDirection: "row",
@@ -118,7 +173,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   dayWeekday: {
-    fontSize: 14,
     fontFamily: "Inter-SemiBold",
     color: "#64748b",
   },

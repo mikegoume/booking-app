@@ -61,7 +61,7 @@ export default function TrainingSlotsScreen() {
             </Text>
           </View>
         )}
-        contentContainerStyle={{ padding: 16, paddingTop: 0 }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         data={filteredSlots}
         renderItem={({ item }) => <TrainingSlotEvent slot={item} />}
         estimatedItemSize={37}
