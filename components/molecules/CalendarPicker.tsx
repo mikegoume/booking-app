@@ -1,22 +1,17 @@
-import React, { useRef, useState } from "react";
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { clsx } from "clsx";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-const CalendarPicker = () => {
-  const scrollViewRef = useRef<ScrollView & { measure: any }>(null);
-  const itemRefs = useRef<(View | null)[]>([]);
+type CalendarPickerProps = {
+  selectedDate: Date;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date>>;
+};
 
-  const [scrollX, setScrollX] = useState(0);
-  const [scrollViewWidth, setScrollViewWidth] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
+const CalendarPicker = ({
+  selectedDate,
+  setSelectedDate,
+}: CalendarPickerProps) => {
   // Generate the next 7 days starting from today
   const generateWeekDays = () => {
     const days = [];
@@ -50,150 +45,56 @@ const CalendarPicker = () => {
     return date.toDateString() === today.toDateString();
   };
 
-  // Scroll to element if out of view
-  const scrollToIndex = (index: number) => {
-    const scrollRef = scrollViewRef.current;
-    const selectedRef = itemRefs.current[index];
-
-    if (!scrollRef || !selectedRef) return;
-
-    selectedRef.measureLayout(
-      // Measure relative to ScrollView
-      scrollRef,
-      (left: number, top: number, width: number, height: number) => {
-        const visibleStart = scrollX;
-        const visibleEnd = scrollX + scrollViewWidth;
-
-        const elementStart = left;
-        const elementEnd = left + width;
-
-        if (elementStart < visibleStart) {
-          // Scroll left to show element start
-          scrollRef.scrollTo({ x: elementStart - 16, animated: true });
-        } else if (elementEnd > visibleEnd) {
-          // Scroll right to show element end
-          scrollRef.scrollTo({
-            x: elementEnd - scrollViewWidth + 16,
-            animated: true,
-          });
-        }
-      },
-      (error: unknown) => {
-        console.warn("measureLayout error:", error);
-      },
-    );
-  };
-
   const handleDatePress = (date: Date, index: number) => {
     setSelectedDate(date);
-    scrollToIndex(index);
   };
 
   return (
-    <ScrollView
-      horizontal
-      ref={scrollViewRef}
-      showsHorizontalScrollIndicator={false}
-      style={styles.weekContainer}
-      onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) =>
-        setScrollX(e.nativeEvent.contentOffset.x)
-      }
-      onLayout={(e) => setScrollViewWidth(e.nativeEvent.layout.width)}
-      scrollEventThrottle={16}
-    >
-      {weekDays.map((date, index) => {
-        const { day, month, weekday } = formatDate(date);
-        const isSelected = date.toDateString() === selectedDate.toDateString();
-        const isTodayDate = isToday(date);
+    <View className="m-4 shadow-sm">
+      <View className="flex flex-row overflow-hidden bg-white rounded-xl justify-between p-4">
+        {weekDays.map((date, index) => {
+          const { day, weekday } = formatDate(date);
+          const isSelected =
+            date.toDateString() === selectedDate.toDateString();
+          const isTodayDate = isToday(date);
 
-        return (
-          <TouchableOpacity
-            key={index}
-            style={[styles.dayButton, isSelected && styles.dayButtonSelected]}
-            onPress={() => handleDatePress(date, index)}
-            ref={(ref) => (itemRefs.current[index] = ref)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handleDatePress(date, index)}
+              activeOpacity={0.7}
             >
-              {day}
-            </Text>
-            <View style={{ display: "flex", flexDirection: "column" }}>
-              {isSelected && (
+              <LinearGradient
+                colors={isSelected ? ["#4f46e5", "#7c3aed"] : ["#fff", "#fff"]} // Your desired gradient colors
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: 49,
+                  height: 49,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 12,
+                }}
+              >
                 <Text
-                  style={[
-                    styles.dayWeekday,
-                    isSelected && styles.dayWeekdaySelected,
-                    isTodayDate && !isSelected && styles.dayWeekdayToday,
-                  ]}
+                  className={clsx(
+                    "text-xs",
+                    isSelected && "text-white",
+                    !isSelected && isTodayDate && "text-red-500",
+                  )}
                 >
                   {weekday}
                 </Text>
-              )}
-              <Text
-                style={[styles.dayMonth, isSelected && styles.dayMonthSelected]}
-              >
-                {month}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
+                <Text className={clsx("font-bold", isSelected && "text-white")}>
+                  {day}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  weekContainer: {
-    maxHeight: 100,
-    paddingTop: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  dayButton: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-    gap: 8,
-    padding: 8,
-  },
-  dayButtonSelected: {
-    padding: 16,
-    backgroundColor: "#1e293b",
-  },
-  dayNumber: {
-    fontSize: 16,
-    fontFamily: "Inter-Bold",
-    color: "#64748b",
-  },
-  dayNumberSelected: {
-    fontSize: 32,
-    color: "#ffffff",
-  },
-  dayWeekday: {
-    fontFamily: "Inter-SemiBold",
-    color: "#64748b",
-  },
-  dayWeekdaySelected: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  dayWeekdayToday: {
-    color: "#ef4444",
-  },
-  dayMonth: {
-    fontSize: 16,
-    fontFamily: "Inter-Medium",
-    color: "#94a3b8",
-  },
-  dayMonthSelected: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-});
 
 export default CalendarPicker;

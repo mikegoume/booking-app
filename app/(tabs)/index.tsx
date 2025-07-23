@@ -3,65 +3,49 @@ import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
 import { useApp } from "@/contexts/AppContext";
 import { FlashList } from "@shopify/flash-list";
 import { CalendarIcon } from "lucide-react-native";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Text, View } from "react-native";
 
 export default function TrainingSlotsScreen() {
   const { user, timeSlots } = useApp();
 
-  // const handleCreateSlot = () => {
-  //   if (!user || user.role !== "trainer") return;
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  //   if (!newSlot.date || !newSlot.startTime || !newSlot.endTime) {
-  //     Alert.alert("Error", "Please fill in all required fields");
-  //     return;
-  //   }
-
-  //   createTimeSlot({
-  //     trainerId: user.id,
-  //     trainerName: user.name,
-  //     date: newSlot.date,
-  //     startTime: newSlot.startTime,
-  //     endTime: newSlot.endTime,
-  //     maxCapacity: parseInt(newSlot.maxCapacity) || 4,
-  //     description: newSlot.description,
-  //   });
-
-  //   setNewSlot({
-  //     date: "",
-  //     startTime: "",
-  //     endTime: "",
-  //     maxCapacity: "4",
-  //     description: "",
-  //   });
-  //   setShowCreateModal(false);
-  // };
+  const filteredSlotsByDate = timeSlots.filter(
+    (slot) =>
+      new Date(slot.date).toDateString() === selectedDate.toDateString(),
+  );
 
   const filteredSlots =
     user?.role === "trainer"
-      ? timeSlots.filter((slot) => slot.trainerId === user.id)
-      : timeSlots;
+      ? filteredSlotsByDate.filter((slot) => slot.trainerId === user.id)
+      : filteredSlotsByDate;
 
   return (
     <View className="flex-1 flex flex-col">
-      <CalendarPicker />
+      <CalendarPicker
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
       <FlashList
         ListEmptyComponent={() => (
-          <View style={styles.emptyState}>
+          <View className="flex flex-col justify-center items-center pt-60">
             <CalendarIcon size={64} color="#94a3b8" />
-            <Text style={styles.emptyStateTitle}>
+            <Text className="text-2xl font-bold">
               {user?.role === "trainer"
                 ? "No slots created yet"
                 : "No available slots"}
             </Text>
-            <Text style={styles.emptyStateSubtitle}>
+            <Text className="text-lg font-semibold text-gray-500">
               {user?.role === "trainer"
                 ? "Create your first training slot to get started"
                 : "Check back later for new training opportunities"}
             </Text>
           </View>
         )}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+        }}
         data={filteredSlots}
         renderItem={({ item }) => <TrainingSlotEvent slot={item} />}
         estimatedItemSize={37}
@@ -154,95 +138,3 @@ export default function TrainingSlotsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontFamily: "Inter-SemiBold",
-    color: "#1e293b",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontFamily: "Inter-SemiBold",
-    color: "#1e293b",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  inputGroupHalf: {
-    flex: 1,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontFamily: "Inter-Medium",
-    color: "#374151",
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    backgroundColor: "#ffffff",
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  createButton: {
-    backgroundColor: "#3b82f6",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 20,
-    marginBottom: 40,
-  },
-  createButtonText: {
-    fontSize: 16,
-    fontFamily: "Inter-SemiBold",
-    color: "#ffffff",
-  },
-});

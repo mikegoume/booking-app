@@ -1,11 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { router, Tabs } from "expo-router";
-import {
-  Calendar,
-  MessageCircle,
-  Settings,
-  UserCheck,
-} from "lucide-react-native";
+import { Tabs } from "expo-router";
+import { Calendar, MessageCircle, UserCheck } from "lucide-react-native";
 import { TouchableWithoutFeedback, View } from "react-native";
 
 export default function TabLayout() {
@@ -78,29 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          headerShown: true,
-          title: "Profile",
-          headerTitle: "",
-          headerTintColor: "#fff",
-          headerBackground: () => (
-            <LinearGradient
-              colors={["#3b82f6", "#60a5fa"]} // Your desired gradient colors
-              style={{ flex: 1 }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            />
-          ),
-          headerRight: () => (
-            <View className="pr-4">
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  router.push("/(tabs)/profile/(settings)/profile-details")
-                }
-              >
-                <Settings size={20} color="#fff" />
-              </TouchableWithoutFeedback>
-            </View>
-          ),
+          headerShown: false,
           tabBarIcon: ({ size, color }) => (
             <UserCheck size={size} color={color} />
           ),

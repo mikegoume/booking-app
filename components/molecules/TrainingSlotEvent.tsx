@@ -1,5 +1,7 @@
 import { TimeSlot, useApp } from "@/contexts/AppContext";
-import { Clock, Users } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link } from "expo-router";
+import { CalendarPlus, Clock, Plus } from "lucide-react-native";
 import React from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
@@ -50,16 +52,22 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
         : "Book Now";
 
   return (
-    <View key={slot.id} className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-      <View className="flex-row justify-between items-start mb-3">
+    <View
+      key={slot.id}
+      className="bg-white rounded-2xl p-5 mb-4 shadow-sm flex flex-row justify-between"
+    >
+      <View className="flex-row justify-between items-start mb-3 flex-1">
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-slate-800 mb-1">
-            {new Date(slot.date).toLocaleDateString("en-US", {
+          <Link asChild href={`/(modals)/slot/${slot.id}`}>
+            <Text className="text-lg font-semibold text-slate-800 mb-1">
+              {/* {new Date(slot.date).toLocaleDateString("en-US", {
               weekday: "long",
               month: "short",
               day: "numeric",
-            })}
-          </Text>
+              })} */}
+              {slot.description}
+            </Text>
+          </Link>
           <View className="flex-row items-center space-x-2">
             <Clock size={16} color="#64748b" />
             <Text className="text-sm font-medium text-slate-500">
@@ -67,39 +75,49 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+        {/* <View className="flex-row items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
           <Users size={16} color="#64748b" />
           <Text className="text-sm font-semibold text-slate-600">
             {slot.currentBookings}/{slot.maxCapacity}
           </Text>
-        </View>
+        </View> */}
       </View>
 
-      {slot.description && (
-        <Text className="text-sm text-slate-500 leading-5 mb-4">
-          {slot.description}
-        </Text>
-      )}
-
-      <View className="flex-row justify-between items-center">
-        <Text className="text-sm font-medium text-slate-600">
+      <View className="flex-row justify-end items-center">
+        {/* <Text className="text-sm font-medium text-slate-600">
           with {slot.trainerName}
-        </Text>
+        </Text> */}
         {user?.role === "trainee" && (
           <TouchableOpacity
-            className={`px-4 py-2 rounded-lg ${
-              isDisabled ? "bg-slate-200" : "bg-[#4f46e5]"
-            }`}
             onPress={() => handleBookSlot(slot.id)}
             disabled={isDisabled}
           >
-            <Text
-              className={`text-sm font-semibold ${
-                isDisabled ? "text-slate-400" : "text-white"
-              }`}
+            <LinearGradient
+              colors={["#4f46e5", "#7c3aed"]} // Your desired gradient colors
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: 48,
+                height: 48,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 24,
+              }}
             >
-              {buttonLabel}
-            </Text>
+              {/* <Text
+                className={`text-sm font-semibold ${
+                  isDisabled ? "text-slate-400" : "text-white"
+                }`}
+              >
+                {buttonLabel}
+              </Text> */}
+
+              {isDisabled ? (
+                <CalendarPlus size={16} color={"white"} />
+              ) : (
+                <Plus size={16} color={"white"} />
+              )}
+            </LinearGradient>
           </TouchableOpacity>
         )}
       </View>

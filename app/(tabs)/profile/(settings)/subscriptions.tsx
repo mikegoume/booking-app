@@ -420,7 +420,6 @@ export default function SubscriptionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
   },
   header: {
     paddingHorizontal: 20,

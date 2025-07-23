@@ -43,6 +43,14 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="chat" />
           <Stack.Screen name="+not-found" />
+          {/* Modal screen */}
+          <Stack.Screen
+            name="(modals)/slot/[id]"
+            options={{
+              presentation: "modal",
+              headerShown: false, // or false
+            }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
