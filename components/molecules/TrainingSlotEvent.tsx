@@ -43,14 +43,6 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
     slot.bookedByIds.includes(user?.id ?? "") ||
     (user?.remainingVisits ?? 0) <= 0;
 
-  const buttonLabel = slot.bookedByIds.includes(user?.id ?? "")
-    ? "Booked"
-    : slot.currentBookings >= slot.maxCapacity
-      ? "Full"
-      : (user?.remainingVisits ?? 0) <= 0
-        ? "No Visits"
-        : "Book Now";
-
   return (
     <View
       key={slot.id}
@@ -60,11 +52,6 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
         <View className="flex-1">
           <Link asChild href={`/(modals)/slot/${slot.id}`}>
             <Text className="text-lg font-semibold text-slate-800 mb-1">
-              {/* {new Date(slot.date).toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-              })} */}
               {slot.description}
             </Text>
           </Link>
@@ -75,18 +62,9 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
             </Text>
           </View>
         </View>
-        {/* <View className="flex-row items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
-          <Users size={16} color="#64748b" />
-          <Text className="text-sm font-semibold text-slate-600">
-            {slot.currentBookings}/{slot.maxCapacity}
-          </Text>
-        </View> */}
       </View>
 
       <View className="flex-row justify-end items-center">
-        {/* <Text className="text-sm font-medium text-slate-600">
-          with {slot.trainerName}
-        </Text> */}
         {user?.role === "trainee" && (
           <TouchableOpacity
             onPress={() => handleBookSlot(slot.id)}
@@ -104,14 +82,6 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
                 borderRadius: 24,
               }}
             >
-              {/* <Text
-                className={`text-sm font-semibold ${
-                  isDisabled ? "text-slate-400" : "text-white"
-                }`}
-              >
-                {buttonLabel}
-              </Text> */}
-
               {isDisabled ? (
                 <CalendarPlus size={16} color={"white"} />
               ) : (
