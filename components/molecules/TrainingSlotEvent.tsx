@@ -46,9 +46,9 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
   return (
     <View
       key={slot.id}
-      className="bg-white rounded-2xl p-5 mb-4 shadow-sm flex flex-row justify-between"
+      className="bg-white rounded-2xl p-4 shadow-sm flex flex-row gap-4 justify-between items-center mb-4"
     >
-      <View className="flex-row justify-between items-start mb-3 flex-1">
+      <View className="flex-row justify-between items-start flex-1">
         <View className="flex-1">
           <Link asChild href={`/(modals)/slot/${slot.id}`}>
             <Text className="text-lg font-semibold text-slate-800 mb-1">
@@ -64,33 +64,31 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
         </View>
       </View>
 
-      <View className="flex-row justify-end items-center">
-        {user?.role === "trainee" && (
-          <TouchableOpacity
-            onPress={() => handleBookSlot(slot.id)}
-            disabled={isDisabled}
+      {user?.role === "trainee" && (
+        <TouchableOpacity
+          onPress={() => handleBookSlot(slot.id)}
+          disabled={isDisabled}
+        >
+          <LinearGradient
+            colors={["#4f46e5", "#7c3aed"]} // Your desired gradient colors
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: 48,
+              height: 48,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 24,
+            }}
           >
-            <LinearGradient
-              colors={["#4f46e5", "#7c3aed"]} // Your desired gradient colors
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: 48,
-                height: 48,
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 24,
-              }}
-            >
-              {isDisabled ? (
-                <CalendarPlus size={16} color={"white"} />
-              ) : (
-                <Plus size={16} color={"white"} />
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-      </View>
+            {isDisabled ? (
+              <CalendarPlus size={16} color={"white"} />
+            ) : (
+              <Plus size={16} color={"white"} />
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
