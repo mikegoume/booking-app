@@ -74,17 +74,17 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
             style={{
               display: "flex",
               flexDirection: "column",
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               justifyContent: "center",
               alignItems: "center",
-              borderRadius: 24,
+              borderRadius: 20,
             }}
           >
             {isDisabled ? (
-              <CalendarPlus size={16} color={"white"} />
+              <CalendarPlus size={14} color={"white"} />
             ) : (
-              <Plus size={16} color={"white"} />
+              <Plus size={14} color={"white"} />
             )}
           </LinearGradient>
         </TouchableOpacity>

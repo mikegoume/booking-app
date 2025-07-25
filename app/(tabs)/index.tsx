@@ -2,12 +2,17 @@ import CalendarPicker from "@/components/molecules/CalendarPicker";
 import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
 import { useApp } from "@/contexts/AppContext";
 import { FlashList } from "@shopify/flash-list";
-import { CalendarIcon } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { CalendarIcon, Plus } from "lucide-react-native";
 import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function TrainingSlotsScreen() {
+  const router = useRouter();
   const { user, timeSlots } = useApp();
+
+  const isTrainee = user?.role === "trainee";
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -51,90 +56,27 @@ export default function TrainingSlotsScreen() {
         estimatedItemSize={37}
         showsVerticalScrollIndicator={false}
       />
-      {/* <Modal
-        visible={showCreateModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Create Training Slot</Text>
-            <TouchableOpacity
-              onPress={() => setShowCreateModal(false)}
-              style={styles.closeButton}
-            >
-              <X size={24} color="#64748b" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={styles.modalContent}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Date (YYYY-MM-DD)</Text>
-              <TextInput
-                style={styles.input}
-                value={newSlot.date}
-                onChangeText={(text) => setNewSlot({ ...newSlot, date: text })}
-                placeholder="2024-12-30"
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <View style={styles.inputGroupHalf}>
-                <Text style={styles.inputLabel}>Start Time</Text>
-                <TextInput
-                  style={styles.input}
-                  value={newSlot.startTime}
-                  onChangeText={(text) =>
-                    setNewSlot({ ...newSlot, startTime: text })
-                  }
-                  placeholder="09:00"
-                />
-              </View>
-              <View style={styles.inputGroupHalf}>
-                <Text style={styles.inputLabel}>End Time</Text>
-                <TextInput
-                  style={styles.input}
-                  value={newSlot.endTime}
-                  onChangeText={(text) =>
-                    setNewSlot({ ...newSlot, endTime: text })
-                  }
-                  placeholder="10:00"
-                />
-              </View>
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Max Capacity</Text>
-              <TextInput
-                style={styles.input}
-                value={newSlot.maxCapacity}
-                onChangeText={(text) =>
-                  setNewSlot({ ...newSlot, maxCapacity: text })
-                }
-                placeholder="4"
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Description (Optional)</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={newSlot.description}
-                onChangeText={(text) =>
-                  setNewSlot({ ...newSlot, description: text })
-                }
-                placeholder="Describe your training session..."
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.createButton}
-              // onPress={handleCreateSlot}
-            >
-              <Text style={styles.createButtonText}>Create Training Slot</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-      </Modal> */}
+      {!isTrainee && (
+        <TouchableOpacity
+          onPress={() => router.push("/(modals)/slot/manage/create")}
+          className="absolute bottom-4 right-4"
+        >
+          <LinearGradient
+            colors={["#4f46e5", "#7c3aed"]} // Your desired gradient colors
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: 50,
+              height: 50,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 25,
+            }}
+          >
+            <Plus size={20} color={"white"} />
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

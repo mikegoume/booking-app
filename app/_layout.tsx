@@ -12,6 +12,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,24 +37,34 @@ export default function RootLayout() {
   }
 
   return (
-    <AppProvider>
-      <ThemeProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="login" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="chat" />
-          <Stack.Screen name="+not-found" />
-          {/* Modal screen */}
-          <Stack.Screen
-            name="(modals)/slot/[id]"
-            options={{
-              presentation: "modal",
-              headerShown: false, // or false
-            }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </AppProvider>
+    <PaperProvider>
+      <AppProvider>
+        <ThemeProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="login" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="chat" />
+            <Stack.Screen name="+not-found" />
+            {/* Modal screen */}
+            <Stack.Screen
+              name="(modals)/slot/[id]"
+              options={{
+                presentation: "modal",
+                headerShown: false, // or false
+              }}
+            />
+            <Stack.Screen
+              name="(modals)/slot/manage/[id]"
+              options={{
+                presentation: "modal",
+                headerShown: true,
+                headerTitle: "Manage Slot",
+              }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </AppProvider>
+    </PaperProvider>
   );
 }
