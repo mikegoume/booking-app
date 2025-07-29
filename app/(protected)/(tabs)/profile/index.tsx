@@ -1,4 +1,5 @@
 import { useApp } from "@/contexts/AppContext";
+import { useAuth } from "@clerk/clerk-expo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -15,7 +16,6 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,24 +25,26 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
+  const { userId, signOut } = useAuth();
+
   const { user, bookings, timeSlots, logout } = useApp();
 
   const userBookings = bookings.filter(
-    (booking) => booking.userId === user?.id && booking.status === "active",
+    (booking) => booking.userId === user?.id && booking.status === "active"
   );
 
   const userSlots = timeSlots.filter((slot) => slot.trainerId === user?.id);
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: logout,
-      },
-    ]);
-  };
+  // const handleLogout = () => {
+  //   Alert.alert("Logout", "Are you sure you want to logout?", [
+  //     { text: "Cancel", style: "cancel" },
+  //     {
+  //       text: "Logout",
+  //       style: "destructive",
+  //       onPress: logout,
+  //     },
+  //   ]);
+  // };
 
   const getRoleColor = () => {
     return user?.role === "trainer" ? "#7c3aed" : "#3b82f6";
@@ -54,7 +56,7 @@ export default function ProfileScreen() {
       : (["#3b82f6", "#60a5fa"] as const);
   };
 
-  if (!user) {
+  if (!userId) {
     return (
       <SafeAreaView style={styles.container}>
         <Text>No user data available</Text>
@@ -64,83 +66,87 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={getRoleGradient()}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <View className="items-center">
-          <View style={styles.avatarContainer}>
-            <User size={40} color="#fff" />
+      {user && (
+        <LinearGradient
+          colors={getRoleGradient()}
+          style={styles.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <View className="items-center">
+            <View style={styles.avatarContainer}>
+              <User size={40} color="#fff" />
+            </View>
+            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userEmail}>{user.email}</Text>
+            <View style={styles.roleContainer}>
+              {user.role === "trainer" ? (
+                <UserCheck size={16} color="#ffffff" />
+              ) : (
+                <User size={16} color="#ffffff" />
+              )}
+              <Text style={styles.roleText}>
+                {user.role === "trainer" ? "Trainer" : "Trainee"}
+              </Text>
+            </View>
           </View>
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
-          <View style={styles.roleContainer}>
-            {user.role === "trainer" ? (
-              <UserCheck size={16} color="#ffffff" />
-            ) : (
-              <User size={16} color="#ffffff" />
-            )}
-            <Text style={styles.roleText}>
-              {user.role === "trainer" ? "Trainer" : "Trainee"}
-            </Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      )}
 
       <ScrollView
         contentContainerClassName="p-5 flex flex-col gap-5"
         showsVerticalScrollIndicator={false}
       >
         {/* Stats */}
-        <View className="flex flex-row gap-5">
-          {user.role === "trainee" ? (
-            <>
-              <View style={styles.statCard}>
-                <View style={styles.statIconContainer}>
-                  <Award size={24} color={getRoleColor()} />
+        {user && (
+          <View className="flex flex-row gap-5">
+            {user.role === "trainee" ? (
+              <>
+                <View style={styles.statCard}>
+                  <View style={styles.statIconContainer}>
+                    <Award size={24} color={getRoleColor()} />
+                  </View>
+                  <Text style={styles.statNumber}>{user.remainingVisits}</Text>
+                  <Text style={styles.statLabel}>Visits Remaining</Text>
                 </View>
-                <Text style={styles.statNumber}>{user.remainingVisits}</Text>
-                <Text style={styles.statLabel}>Visits Remaining</Text>
-              </View>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconContainer}>
-                  <Calendar size={24} color={getRoleColor()} />
+                <View style={styles.statCard}>
+                  <View style={styles.statIconContainer}>
+                    <Calendar size={24} color={getRoleColor()} />
+                  </View>
+                  <Text style={styles.statNumber}>{userBookings.length}</Text>
+                  <Text style={styles.statLabel}>Active Bookings</Text>
                 </View>
-                <Text style={styles.statNumber}>{userBookings.length}</Text>
-                <Text style={styles.statLabel}>Active Bookings</Text>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.statCard}>
-                <View style={styles.statIconContainer}>
-                  <Calendar size={24} color={getRoleColor()} />
+              </>
+            ) : (
+              <>
+                <View style={styles.statCard}>
+                  <View style={styles.statIconContainer}>
+                    <Calendar size={24} color={getRoleColor()} />
+                  </View>
+                  <Text style={styles.statNumber}>{userSlots.length}</Text>
+                  <Text style={styles.statLabel}>Training Slots</Text>
                 </View>
-                <Text style={styles.statNumber}>{userSlots.length}</Text>
-                <Text style={styles.statLabel}>Training Slots</Text>
-              </View>
 
-              <View style={styles.statCard}>
-                <View style={styles.statIconContainer}>
-                  <UserCheck size={24} color={getRoleColor()} />
+                <View style={styles.statCard}>
+                  <View style={styles.statIconContainer}>
+                    <UserCheck size={24} color={getRoleColor()} />
+                  </View>
+                  <Text style={styles.statNumber}>
+                    {userSlots.reduce(
+                      (acc, slot) => acc + slot.currentBookings,
+                      0
+                    )}
+                  </Text>
+                  <Text style={styles.statLabel}>Total Bookings</Text>
                 </View>
-                <Text style={styles.statNumber}>
-                  {userSlots.reduce(
-                    (acc, slot) => acc + slot.currentBookings,
-                    0,
-                  )}
-                </Text>
-                <Text style={styles.statLabel}>Total Bookings</Text>
-              </View>
-            </>
-          )}
-        </View>
+              </>
+            )}
+          </View>
+        )}
 
         {/* Trainee-specific options */}
-        {user.role === "trainee" ? (
+        {user && user?.role === "trainee" ? (
           <View className="flex flex-col gap-5">
             <TouchableOpacity
               style={styles.menuItem}
@@ -225,7 +231,7 @@ export default function ProfileScreen() {
         )}
 
         {/* Menu Options */}
-        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => signOut()}>
           <View style={styles.menuItemLeft}>
             <View
               style={[styles.menuIconContainer, styles.logoutIconContainer]}

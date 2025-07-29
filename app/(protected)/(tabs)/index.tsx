@@ -17,8 +17,7 @@ export default function TrainingSlotsScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const filteredSlotsByDate = timeSlots.filter(
-    (slot) =>
-      new Date(slot.date).toDateString() === selectedDate.toDateString(),
+    (slot) => new Date(slot.date).toDateString() === selectedDate.toDateString()
   );
 
   const filteredSlots =
