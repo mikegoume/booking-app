@@ -2,6 +2,8 @@ import { AppProvider } from "@/contexts/AppContext";
 import ThemeProvider from "@/contexts/ThemeContext";
 import "@/global.css";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -9,12 +11,14 @@ import {
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
+
+const publicKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -37,34 +41,15 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider>
-      <AppProvider>
-        <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="login" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="chat" />
-            <Stack.Screen name="+not-found" />
-            {/* Modal screen */}
-            <Stack.Screen
-              name="(modals)/slot/[id]"
-              options={{
-                presentation: "modal",
-                headerShown: false, // or false
-              }}
-            />
-            <Stack.Screen
-              name="(modals)/slot/manage/[id]"
-              options={{
-                presentation: "modal",
-                headerShown: true,
-                headerTitle: "Manage Slot",
-              }}
-            />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AppProvider>
-    </PaperProvider>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publicKey}>
+      <PaperProvider>
+        <AppProvider>
+          <ThemeProvider>
+            <StatusBar style="auto" />
+            <Slot />
+          </ThemeProvider>
+        </AppProvider>
+      </PaperProvider>
+    </ClerkProvider>
   );
 }

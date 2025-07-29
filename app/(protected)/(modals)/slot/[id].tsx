@@ -28,7 +28,7 @@ const SlotInfo = () => {
       </Pressable>
       <ScrollView>
         <Image
-          source={require("../../../assets/images/workout.png")}
+          source={require("../../../../assets/images/workout.png")}
           style={{ width: 200, height: 200, alignSelf: "center" }}
         />
         <Text className="text-2xl font-bold">{slot?.description}</Text>
@@ -49,7 +49,7 @@ const SlotInfo = () => {
         </View>
         <View className="border border-gray-300 rounded-lg p-4 my-4 flex flex-row gap-4 justify-between items-center">
           <Image
-            source={require("../../../assets/images/profile.jpg")}
+            source={require("../../../../assets/images/profile.jpg")}
             className="size-12 bg-yellow-900 rounded-full"
           />
           <View className="flex-1">
