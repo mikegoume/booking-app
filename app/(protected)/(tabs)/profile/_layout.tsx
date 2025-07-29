@@ -25,7 +25,7 @@ export default function ProfileLayout() {
             <View className="pr-4">
               <TouchableWithoutFeedback
                 onPress={() =>
-                  router.push("/(tabs)/profile/(settings)/profile-details")
+                  router.push("./(tabs)/profile/(settings)/profile-details")
                 }
               >
                 <Settings size={20} color="#fff" />

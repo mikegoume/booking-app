@@ -27,10 +27,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ProfileScreen() {
   const { userId, signOut } = useAuth();
 
-  const { user, bookings, timeSlots, logout } = useApp();
+  const { user, bookings, timeSlots } = useApp();
 
   const userBookings = bookings.filter(
-    (booking) => booking.userId === user?.id && booking.status === "active"
+    (booking) => booking.userId === user?.id && booking.status === "active",
   );
 
   const userSlots = timeSlots.filter((slot) => slot.trainerId === user?.id);
@@ -135,7 +135,7 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>
                     {userSlots.reduce(
                       (acc, slot) => acc + slot.currentBookings,
-                      0
+                      0,
                     )}
                   </Text>
                   <Text style={styles.statLabel}>Total Bookings</Text>
@@ -151,7 +151,7 @@ export default function ProfileScreen() {
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() =>
-                router.push("/(tabs)/profile/(settings)/subscriptions")
+                router.push("./(tabs)/profile/(settings)/subscriptions")
               }
             >
               <View style={styles.optionLeft}>

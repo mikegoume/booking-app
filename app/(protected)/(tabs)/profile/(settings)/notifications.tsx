@@ -1,22 +1,22 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
-    ArrowLeft,
-    Bell,
-    Calendar,
-    Clock,
-    MessageCircle,
-    Users,
-    Zap,
+  ArrowLeft,
+  Bell,
+  Calendar,
+  Clock,
+  MessageCircle,
+  Users,
+  Zap,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 

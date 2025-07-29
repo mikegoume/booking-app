@@ -1,24 +1,24 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
-    ArrowLeft,
-    CreditCard,
-    DollarSign,
-    MoveVertical as MoreVertical,
-    Plus,
-    Shield,
-    Star,
-    X,
+  ArrowLeft,
+  CreditCard,
+  DollarSign,
+  MoveVertical as MoreVertical,
+  Plus,
+  Shield,
+  Star,
+  X,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
