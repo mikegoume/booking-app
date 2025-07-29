@@ -1,6 +1,4 @@
-import { useApp } from "@/contexts/AppContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   SafeAreaView,
@@ -13,11 +11,6 @@ import DatePicker from "react-native-date-picker";
 import { TextInput } from "react-native-paper";
 
 const ManageSlot = () => {
-  const { id } = useLocalSearchParams();
-  const { timeSlots } = useApp();
-
-  const selectedSlot = id;
-
   const [newSlot, setNewSlot] = useState({
     date: "",
     startTime: "",

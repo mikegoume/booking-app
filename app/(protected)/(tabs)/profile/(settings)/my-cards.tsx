@@ -44,7 +44,6 @@ interface PaymentHistory {
 }
 
 export default function MyCardsScreen() {
-  const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [showCardMenu, setShowCardMenu] = useState<string | null>(null);
 
   const savedCards: SavedCard[] = [
@@ -213,7 +212,7 @@ export default function MyCardsScreen() {
 
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => router.push("/add-card")}
+            onPress={() => router.push("./add-card")}
           >
             <Plus size={24} color="#ffffff" />
           </TouchableOpacity>
@@ -331,7 +330,7 @@ export default function MyCardsScreen() {
                       style={styles.cardMenuItem}
                       onPress={() => {
                         setShowCardMenu(null);
-                        router.push(`/edit-card?cardId=${card.id}`);
+                        router.push(`./edit-card?cardId=${card.id}`);
                       }}
                     >
                       <CreditCard size={16} color="#64748b" />
