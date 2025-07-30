@@ -10,6 +10,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,6 +20,8 @@ import { PaperProvider } from "react-native-paper";
 SplashScreen.preventAutoHideAsync();
 
 const publicKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -42,14 +45,16 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publicKey}>
-      <PaperProvider>
-        <AppProvider>
-          <ThemeProvider>
-            <StatusBar style="auto" />
-            <Slot />
-          </ThemeProvider>
-        </AppProvider>
-      </PaperProvider>
+      <QueryClientProvider client={queryClient}>
+        <PaperProvider>
+          <AppProvider>
+            <ThemeProvider>
+              <StatusBar style="auto" />
+              <Slot />
+            </ThemeProvider>
+          </AppProvider>
+        </PaperProvider>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }

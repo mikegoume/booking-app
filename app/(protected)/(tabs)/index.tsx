@@ -1,7 +1,9 @@
 import CalendarPicker from "@/components/molecules/CalendarPicker";
 import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
 import { useApp } from "@/contexts/AppContext";
+import { fetchTimeSlots } from "@/services/timeSlotService";
 import { FlashList } from "@shopify/flash-list";
+import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { CalendarIcon, Plus } from "lucide-react-native";
@@ -10,20 +12,25 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 export default function TrainingSlotsScreen() {
   const router = useRouter();
-  const { user, timeSlots } = useApp();
+  const { user } = useApp();
+
+  const { data: timeSlots } = useQuery({
+    queryKey: ["timeslots"],
+    queryFn: () => fetchTimeSlots(),
+  });
 
   const isTrainee = user?.role === "trainee";
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const filteredSlotsByDate = timeSlots.filter(
+  const filteredSlotsByDate = timeSlots?.filter(
     (slot) =>
       new Date(slot.date).toDateString() === selectedDate.toDateString(),
   );
 
   const filteredSlots =
     user?.role === "trainer"
-      ? filteredSlotsByDate.filter((slot) => slot.trainerId === user.id)
+      ? filteredSlotsByDate?.filter((slot) => slot.trainerId === user.id)
       : filteredSlotsByDate;
 
   return (

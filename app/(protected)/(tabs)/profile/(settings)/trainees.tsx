@@ -1,4 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
+import { fetchTimeSlots } from "@/services/timeSlotService";
+import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -27,10 +29,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TraineesScreen() {
-  const { user, bookings, timeSlots, updateUserVisits, getAllUsers } = useApp();
+  const { user, updateUserVisits, getAllUsers } = useApp();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTrainee, setSelectedTrainee] = useState<any>(null);
   const [newVisits, setNewVisits] = useState("");
+
+  const { data: timeSlots } = useQuery({
+    queryKey: ["timeslots"],
+    queryFn: () => fetchTimeSlots(),
+  });
 
   if (user?.role !== "trainer") {
     return (
@@ -44,7 +51,7 @@ export default function TraineesScreen() {
 
   // Get all trainees who have booked with this trainer
   const allUsers = getAllUsers();
-  const trainerSlots = timeSlots.filter((slot) => slot.trainerId === user.id);
+  const trainerSlots = timeSlots?.filter((slot) => slot.trainerId === user.id);
   const trainerBookings = bookings.filter(
     (booking) =>
       trainerSlots.some((slot) => slot.id === booking.slotId) &&

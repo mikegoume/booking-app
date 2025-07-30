@@ -12,10 +12,10 @@ type TrainingSlotEventPropTypes = {
 const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
   const { user, bookSlot } = useApp();
 
-  const handleBookSlot = (slotId: string) => {
+  const handleBookSlot = (slotId: number) => {
     if (!user || user.role !== "trainee") return;
 
-    if (user.remainingVisits <= 0) {
+    if (user.remaining_visits <= 0) {
       Alert.alert(
         "No Visits Remaining",
         "You have no remaining training visits. Please contact your trainer to purchase more sessions.",
@@ -39,9 +39,8 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
   };
 
   const isDisabled =
-    slot.currentBookings >= slot.maxCapacity ||
-    slot.bookedByIds.includes(user?.id ?? "") ||
-    (user?.remainingVisits ?? 0) <= 0;
+    slot.current_bookings >= slot.max_capacity ||
+    (user?.remaining_visits ?? 0) <= 0;
 
   return (
     <View
@@ -50,15 +49,17 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
     >
       <View className="flex-row justify-between items-start flex-1">
         <View className="flex-1">
-          <Link asChild href={`/(modals)/slot/${slot.id}`}>
+          <Link asChild href={`./(modals)/slot/${slot.id}`}>
             <Text className="text-lg font-semibold text-slate-800 mb-1">
               {slot.description}
             </Text>
           </Link>
-          <View className="flex-row items-center space-x-2">
+          <View className="flex-row items-center space-x-2 gap-2">
             <Clock size={16} color="#64748b" />
             <Text className="text-sm font-medium text-slate-500">
-              {slot.startTime} - {slot.endTime}
+              {`${slot.start_time.split(":")[0]}:${slot.start_time.split(":")[1]}`}
+              {" - "}
+              {`${slot.end_time.split(":")[0]}:${slot.end_time.split(":")[1]}`}
             </Text>
           </View>
         </View>

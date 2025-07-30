@@ -1,33 +1,40 @@
 import React, { createContext, useContext, useState } from "react";
 
+export type Role = "trainee" | "trainer";
+
 export interface User {
-  id: string;
+  id: string; // Primary key
   name: string;
   email: string;
-  role: "trainer" | "trainee";
-  remainingVisits: number;
+  role: Role; // Enum: 'trainee' or 'trainer'
+  remaining_visits: number; // For trainees only (trainers usually 0)
 }
 
+// ==========================
+// 2. Slot Type
+// ==========================
 export interface TimeSlot {
-  id: string;
-  trainerId: string;
-  trainerName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  maxCapacity: number;
-  currentBookings: number;
-  bookedByIds: string[];
+  id: number; // Auto-increment primary key
+  user_id: string; // Foreign key -> User (trainer)
+  title: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  start_time: string; // HH:mm (24hr)
+  end_time: string; // HH:mm (24hr)
   description?: string;
+  max_capacity: number;
+  current_bookings: number; // Derived or tracked field
 }
+
+// ==========================
+// 3. Slot Booking Type
+// ==========================
+export type BookingStatus = "confirmed" | "cancelled";
 
 export interface Booking {
-  id: string;
-  userId: string;
-  slotId: string;
-  slot: TimeSlot;
-  bookedAt: string;
-  status: "active" | "cancelled";
+  id: number; // Auto-increment primary key
+  slot_id: number; // Foreign key -> Slot
+  user_id: string; // Foreign key -> User (trainee)
+  booking_status: BookingStatus;
 }
 
 export interface ChatMessage {
@@ -42,15 +49,11 @@ export interface ChatMessage {
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
-  timeSlots: TimeSlot[];
-  setTimeSlots: React.Dispatch<React.SetStateAction<TimeSlot[]>>;
-  bookings: Booking[];
-  setBookings: React.Dispatch<React.SetStateAction<Booking[]>>;
   chatMessages: ChatMessage[];
   createTimeSlot: (
     slot: Omit<TimeSlot, "id" | "currentBookings" | "bookedByIds">,
   ) => void;
-  bookSlot: (slotId: string) => boolean;
+  bookSlot: (slotId: number) => boolean;
   cancelBooking: (bookingId: string) => void;
   login: (username: string) => boolean;
   logout: () => void;
@@ -106,98 +109,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState<Record<string, User>>(mockUsers);
-
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
-    {
-      bookedByIds: ["4", "5"],
-      currentBookings: 2,
-      date: "2025-07-24",
-      description: "High-intensity interval training session",
-      endTime: "10:00",
-      id: "1",
-      maxCapacity: 4,
-      startTime: "09:00",
-      trainerId: "2",
-      trainerName: "Sarah Johnson",
-    },
-    {
-      bookedByIds: ["4"],
-      currentBookings: 1,
-      date: "2025-07-24",
-      description: "Strength training focused on upper body",
-      endTime: "12:00",
-      id: "2",
-      maxCapacity: 3,
-      startTime: "11:00",
-      trainerId: "2",
-      trainerName: "Sarah Johnson",
-    },
-    {
-      bookedByIds: ["1", "5"],
-      currentBookings: 2,
-      date: "2025-07-25",
-      description: "Morning cardio and flexibility training",
-      endTime: "09:00",
-      id: "3",
-      maxCapacity: 5,
-      startTime: "08:00",
-      trainerId: "3",
-      trainerName: "Mike Wilson",
-    },
-    {
-      bookedByIds: [],
-      currentBookings: 0,
-      date: "2025-07-26",
-      description: "Core strengthening and balance training",
-      endTime: "11:00",
-      id: "4",
-      maxCapacity: 4,
-      startTime: "10:00",
-      trainerId: "3",
-      trainerName: "Mike Wilson",
-    },
-  ]);
-
-  const [bookings, setBookings] = useState<Booking[]>([
-    {
-      id: "1",
-      userId: "1",
-      slotId: "3",
-      slot: {
-        id: "3",
-        trainerId: "3",
-        trainerName: "Mike Wilson",
-        date: "2024-12-28",
-        startTime: "08:00",
-        endTime: "09:00",
-        maxCapacity: 5,
-        currentBookings: 2,
-        bookedByIds: ["1", "5"],
-        description: "Morning cardio and flexibility training",
-      },
-      bookedAt: "2024-12-26T10:30:00Z",
-      status: "active",
-    },
-    {
-      id: "2",
-      userId: "4",
-      slotId: "1",
-      slot: {
-        id: "1",
-        trainerId: "2",
-        trainerName: "Sarah Johnson",
-        date: "2024-12-27",
-        startTime: "09:00",
-        endTime: "10:00",
-        maxCapacity: 4,
-        currentBookings: 2,
-        bookedByIds: ["4", "5"],
-        description: "High-intensity interval training session",
-      },
-      bookedAt: "2024-12-26T14:15:00Z",
-      status: "active",
-    },
-  ]);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -272,7 +183,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTimeSlots((prev) => [...prev, newSlot]);
   };
 
-  const bookSlot = (slotId: string): boolean => {
+  const bookSlot = (slotId: number): boolean => {
     if (!user || user.remainingVisits <= 0) return false;
 
     const slot = timeSlots.find((s) => s.id === slotId);
@@ -389,10 +300,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         setUser,
-        timeSlots,
-        setTimeSlots,
-        bookings,
-        setBookings,
         chatMessages,
         createTimeSlot,
         bookSlot,
