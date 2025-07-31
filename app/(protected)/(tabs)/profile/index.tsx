@@ -1,5 +1,7 @@
-import { useApp } from "@/contexts/AppContext";
+import { fetchTimeSlotByUserId } from "@/services/timeSlotService";
+import { fetchUserById } from "@/services/userService";
 import { useAuth } from "@clerk/clerk-expo";
+import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -16,6 +18,7 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,7 +30,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ProfileScreen() {
   const { userId, signOut } = useAuth();
 
-  const { user } = useApp();
+  const { data: user } = useQuery({
+    queryKey: ["userProfile", userId],
+    queryFn: () => fetchUserById(userId as string),
+    enabled: !!userId,
+  });
+
+  const { data: timeSlots } = useQuery({
+    queryKey: ["timeSlots", userId],
+    queryFn: () => fetchTimeSlotByUserId(userId as string),
+    enabled: !!userId,
+  });
 
   // const userBookings = bookings.filter(
   //   (booking) => booking.userId === user?.id && booking.status === "active",
@@ -51,9 +64,7 @@ export default function ProfileScreen() {
   };
 
   const getRoleGradient = () => {
-    return user?.role === "trainer"
-      ? (["#7c3aed", "#c084fc"] as const)
-      : (["#3b82f6", "#60a5fa"] as const);
+    return ["#3b82f6", "#60a5fa"] as const;
   };
 
   if (!userId) {
@@ -73,19 +84,26 @@ export default function ProfileScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          <View className="items-center">
-            <View style={styles.avatarContainer}>
-              <User size={40} color="#fff" />
+          <View className="items-center gap-4">
+            <Image
+              source={{ uri: user.image_url }}
+              className="size-20 rounded-full"
+            />
+            <View className="items-center gap-1">
+              <Text className="font-semibold text-xl text-white">
+                {user.name}
+              </Text>
+              <Text className="font-semibold text-md text-white">
+                {user.email}
+              </Text>
             </View>
-            <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
-            <View style={styles.roleContainer}>
+            <View className="flex flex-row gap-2 px-4 py-2 bg-slate-50/30 rounded-full">
               {user.role === "trainer" ? (
                 <UserCheck size={16} color="#ffffff" />
               ) : (
                 <User size={16} color="#ffffff" />
               )}
-              <Text style={styles.roleText}>
+              <Text className="text-sm text-white font-semibold">
                 {user.role === "trainer" ? "Trainer" : "Trainee"}
               </Text>
             </View>
@@ -106,7 +124,7 @@ export default function ProfileScreen() {
                   <View style={styles.statIconContainer}>
                     <Award size={24} color={getRoleColor()} />
                   </View>
-                  <Text style={styles.statNumber}>{user.remainingVisits}</Text>
+                  <Text style={styles.statNumber}>{user.remaining_visits}</Text>
                   <Text style={styles.statLabel}>Visits Remaining</Text>
                 </View>
 
@@ -124,7 +142,7 @@ export default function ProfileScreen() {
                   <View style={styles.statIconContainer}>
                     <Calendar size={24} color={getRoleColor()} />
                   </View>
-                  <Text style={styles.statNumber}>{userSlots.length}</Text>
+                  <Text style={styles.statNumber}>{timeSlots?.length}</Text>
                   <Text style={styles.statLabel}>Training Slots</Text>
                 </View>
 
@@ -133,7 +151,7 @@ export default function ProfileScreen() {
                     <UserCheck size={24} color={getRoleColor()} />
                   </View>
                   <Text style={styles.statNumber}>
-                    {userSlots.reduce(
+                    {timeSlots?.reduce(
                       (acc, slot) => acc + slot.currentBookings,
                       0,
                     )}
@@ -255,15 +273,7 @@ const styles = StyleSheet.create({
   header: {
     paddingBottom: 40,
   },
-  avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
+
   userName: {
     fontSize: 24,
     fontFamily: "Inter-Bold",
@@ -281,8 +291,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-
     paddingVertical: 6,
+    paddingHorizontal: 20,
     borderRadius: 20,
     gap: 6,
   },

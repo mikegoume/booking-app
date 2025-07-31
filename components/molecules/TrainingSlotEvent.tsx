@@ -1,35 +1,53 @@
-import { TimeSlot } from "@/contexts/AppContext";
-import { useUser } from "@clerk/clerk-expo";
+import { TimeSlot, User } from "@/contexts/AppContext";
+import {
+  bookSlot,
+  fetchBookingsOfUserForSlot,
+} from "@/services/slotBookingService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-import { CalendarPlus, Clock, Plus } from "lucide-react-native";
+import { BookCheck, Clock, Plus } from "lucide-react-native";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 type TrainingSlotEventPropTypes = {
   slot: TimeSlot;
+  user: User;
 };
 
-const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
-  const { user } = useUser();
+const TrainingSlotEvent = ({ slot, user }: TrainingSlotEventPropTypes) => {
+  const queryClient = useQueryClient();
 
-  const handleBookSlot = (slotId: number) => {
-    // if (success) {
-    //   Alert.alert(
-    //     "Success",
-    //     "You have successfully booked this training slot!",
-    //   );
-    // } else {
-    //   Alert.alert(
-    //     "Booking Failed",
-    //     "Unable to book this slot. It may be full or you may have already booked it.",
-    //   );
-    // }
-  };
+  const { data: slotBookingForUser } = useQuery({
+    queryKey: ["bookingsforslot", slot?.id, user?.id],
+    queryFn: () => fetchBookingsOfUserForSlot(slot.id, user.id),
+    enabled: !!slot.id && !!user.id,
+  });
+
+  const bookSlotMutation = useMutation({
+    mutationKey: ["bookMutation"],
+    mutationFn: (slotId: number) => bookSlot(slotId, user.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["bookingsforslot", slot.id, user.id],
+      });
+      Alert.alert(
+        "Success",
+        "You have successfully booked this training slot!",
+      );
+    },
+    onError: () => {
+      Alert.alert(
+        "Booking Failed",
+        "Unable to book this slot. It may be full or you may have already booked it.",
+      );
+    },
+  });
 
   const isDisabled =
+    (slotBookingForUser && slotBookingForUser?.length > 0) ||
     slot.current_bookings >= slot.max_capacity ||
-    (user?.remaining_visits ?? 0) <= 0;
+    user?.remaining_visits <= 0;
 
   return (
     <View
@@ -56,7 +74,7 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
 
       {user?.role === "trainee" && (
         <TouchableOpacity
-          onPress={() => handleBookSlot(slot.id)}
+          onPress={() => bookSlotMutation.mutate(slot.id)}
           disabled={isDisabled}
         >
           <LinearGradient
@@ -72,7 +90,7 @@ const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
             }}
           >
             {isDisabled ? (
-              <CalendarPlus size={14} color={"white"} />
+              <BookCheck size={14} color={"white"} />
             ) : (
               <Plus size={14} color={"white"} />
             )}

@@ -8,6 +8,8 @@ export interface User {
   email: string;
   role: Role; // Enum: 'trainee' or 'trainer'
   remaining_visits: number; // For trainees only (trainers usually 0)
+  image_url: string;
+  created_at: string;
 }
 
 // ==========================

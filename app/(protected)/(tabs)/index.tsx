@@ -1,7 +1,8 @@
 import CalendarPicker from "@/components/molecules/CalendarPicker";
 import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
 import { fetchTimeSlots } from "@/services/timeSlotService";
-import { useUser } from "@clerk/clerk-expo";
+import { fetchUserById } from "@/services/userService";
+import { useAuth } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,17 +10,24 @@ import { useRouter } from "expo-router";
 import { CalendarIcon, Plus } from "lucide-react-native";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 export default function TrainingSlotsScreen() {
   const router = useRouter();
-  const { user } = useUser();
+  const { userId } = useAuth();
+
+  const { data: user } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => fetchUserById(userId as string),
+    enabled: !!userId,
+  });
 
   const { data: timeSlots } = useQuery({
     queryKey: ["timeslots"],
     queryFn: () => fetchTimeSlots(),
   });
 
-  const isTrainee = user?.publicMetadata.role === "trainee";
+  const isTrainee = user?.role === "trainee";
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -29,9 +37,13 @@ export default function TrainingSlotsScreen() {
   );
 
   const filteredSlots =
-    user?.publicMetadata.role === "trainer"
+    user?.role === "trainer"
       ? filteredSlotsByDate?.filter((slot) => slot.trainerId === user.id)
       : filteredSlotsByDate;
+
+  if (!user || !timeSlots) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <View className="flex-1 flex flex-col">
@@ -44,12 +56,12 @@ export default function TrainingSlotsScreen() {
           <View className="flex flex-col justify-center items-center pt-60">
             <CalendarIcon size={64} color="#94a3b8" />
             <Text className="text-2xl font-bold">
-              {user?.publicMetadata.role === "trainer"
+              {user?.role === "trainer"
                 ? "No slots created yet"
                 : "No available slots"}
             </Text>
             <Text className="text-lg font-semibold text-gray-500">
-              {user?.publicMetadata.role === "trainer"
+              {user?.role === "trainer"
                 ? "Create your first training slot to get started"
                 : "Check back later for new training opportunities"}
             </Text>
@@ -59,7 +71,7 @@ export default function TrainingSlotsScreen() {
           paddingHorizontal: 16,
         }}
         data={filteredSlots}
-        renderItem={({ item }) => <TrainingSlotEvent slot={item} />}
+        renderItem={({ item }) => <TrainingSlotEvent slot={item} user={user} />}
         estimatedItemSize={37}
         showsVerticalScrollIndicator={false}
       />

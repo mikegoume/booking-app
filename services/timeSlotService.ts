@@ -36,3 +36,19 @@ export const fetchTimeSlotById = async (id: number) => {
     return slot;
   }
 };
+
+export const fetchTimeSlotByUserId = async (userId: string) => {
+  console.log(userId);
+  let { data: slots, error } = await supabase
+    .from("slots")
+    .select("*")
+    .eq("user_id", userId);
+
+  console.log("response: ", slots);
+
+  if (error) {
+    throw error;
+  } else {
+    return slots;
+  }
+};

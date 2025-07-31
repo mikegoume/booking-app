@@ -31,7 +31,7 @@ export default function TabLayout() {
           headerShown: true,
           headerRight: () => (
             <View className="pr-4">
-              <Link href={"./chat"}>
+              <Link href={"./(chat)/index"}>
                 <MessageCircle size={20} color={"white"} />
               </Link>
             </View>
