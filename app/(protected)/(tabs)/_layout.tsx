@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Tabs } from "expo-router";
+import { Link, Tabs } from "expo-router";
 import { Calendar, MessageCircle, UserCheck } from "lucide-react-native";
-import { TouchableWithoutFeedback, View } from "react-native";
+import { View } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -31,9 +31,9 @@ export default function TabLayout() {
           headerShown: true,
           headerRight: () => (
             <View className="pr-4">
-              <TouchableWithoutFeedback>
+              <Link href={"./chat"}>
                 <MessageCircle size={20} color={"white"} />
-              </TouchableWithoutFeedback>
+              </Link>
             </View>
           ),
           headerBackground: () => (
@@ -52,7 +52,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="bookings"
+        name="bookings/index"
         options={{
           headerShown: true,
           title: "My Bookings",

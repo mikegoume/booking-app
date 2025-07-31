@@ -1,7 +1,7 @@
 import CalendarPicker from "@/components/molecules/CalendarPicker";
 import TrainingSlotEvent from "@/components/molecules/TrainingSlotEvent";
-import { useApp } from "@/contexts/AppContext";
 import { fetchTimeSlots } from "@/services/timeSlotService";
+import { useUser } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,14 +12,14 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 export default function TrainingSlotsScreen() {
   const router = useRouter();
-  const { user } = useApp();
+  const { user } = useUser();
 
   const { data: timeSlots } = useQuery({
     queryKey: ["timeslots"],
     queryFn: () => fetchTimeSlots(),
   });
 
-  const isTrainee = user?.role === "trainee";
+  const isTrainee = user?.publicMetadata.role === "trainee";
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -29,7 +29,7 @@ export default function TrainingSlotsScreen() {
   );
 
   const filteredSlots =
-    user?.role === "trainer"
+    user?.publicMetadata.role === "trainer"
       ? filteredSlotsByDate?.filter((slot) => slot.trainerId === user.id)
       : filteredSlotsByDate;
 
@@ -44,12 +44,12 @@ export default function TrainingSlotsScreen() {
           <View className="flex flex-col justify-center items-center pt-60">
             <CalendarIcon size={64} color="#94a3b8" />
             <Text className="text-2xl font-bold">
-              {user?.role === "trainer"
+              {user?.publicMetadata.role === "trainer"
                 ? "No slots created yet"
                 : "No available slots"}
             </Text>
             <Text className="text-lg font-semibold text-gray-500">
-              {user?.role === "trainer"
+              {user?.publicMetadata.role === "trainer"
                 ? "Create your first training slot to get started"
                 : "Check back later for new training opportunities"}
             </Text>

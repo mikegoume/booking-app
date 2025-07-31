@@ -1,41 +1,30 @@
-import { TimeSlot, useApp } from "@/contexts/AppContext";
+import { TimeSlot } from "@/contexts/AppContext";
+import { useUser } from "@clerk/clerk-expo";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { CalendarPlus, Clock, Plus } from "lucide-react-native";
 import React from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type TrainingSlotEventPropTypes = {
   slot: TimeSlot;
 };
 
 const TrainingSlotEvent = ({ slot }: TrainingSlotEventPropTypes) => {
-  const { user, bookSlot } = useApp();
+  const { user } = useUser();
 
   const handleBookSlot = (slotId: number) => {
-    if (!user || user.role !== "trainee") return;
-
-    if (user.remaining_visits <= 0) {
-      Alert.alert(
-        "No Visits Remaining",
-        "You have no remaining training visits. Please contact your trainer to purchase more sessions.",
-      );
-      return;
-    }
-
-    const success = bookSlot(slotId);
-
-    if (success) {
-      Alert.alert(
-        "Success",
-        "You have successfully booked this training slot!",
-      );
-    } else {
-      Alert.alert(
-        "Booking Failed",
-        "Unable to book this slot. It may be full or you may have already booked it.",
-      );
-    }
+    // if (success) {
+    //   Alert.alert(
+    //     "Success",
+    //     "You have successfully booked this training slot!",
+    //   );
+    // } else {
+    //   Alert.alert(
+    //     "Booking Failed",
+    //     "Unable to book this slot. It may be full or you may have already booked it.",
+    //   );
+    // }
   };
 
   const isDisabled =

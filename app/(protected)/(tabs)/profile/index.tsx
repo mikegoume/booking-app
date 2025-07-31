@@ -27,13 +27,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ProfileScreen() {
   const { userId, signOut } = useAuth();
 
-  const { user, bookings, timeSlots } = useApp();
+  const { user } = useApp();
 
-  const userBookings = bookings.filter(
-    (booking) => booking.userId === user?.id && booking.status === "active",
-  );
+  // const userBookings = bookings.filter(
+  //   (booking) => booking.userId === user?.id && booking.status === "active",
+  // );
 
-  const userSlots = timeSlots.filter((slot) => slot.trainerId === user?.id);
+  // const userSlots = timeSlots.filter((slot) => slot.trainerId === user?.id);
 
   // const handleLogout = () => {
   //   Alert.alert("Logout", "Are you sure you want to logout?", [

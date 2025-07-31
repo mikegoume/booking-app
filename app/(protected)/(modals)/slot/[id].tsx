@@ -29,8 +29,6 @@ const SlotInfo = () => {
     enabled: slot?.user_id != null,
   });
 
-  console.log();
-
   if (!slot) return;
 
   return (

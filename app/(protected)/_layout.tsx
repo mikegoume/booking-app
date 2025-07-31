@@ -11,14 +11,13 @@ export default function AppProtectedLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="chat" />
       <Stack.Screen name="+not-found" />
       {/* Modal screen */}
       <Stack.Screen
         name="(modals)/slot/[id]"
         options={{
           presentation: "modal",
-          headerShown: false, // or false
+          headerShown: true, // or false
         }}
       />
       <Stack.Screen
