@@ -1,11 +1,17 @@
+import {
+  bookSlot,
+  fetchBookingsOfUserForSlot,
+} from "@/services/slotBookingService";
 import { fetchTimeSlotById } from "@/services/timeSlotService";
 import { fetchUserById } from "@/services/userService";
-import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-expo";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft, MessagesSquareIcon, Users } from "lucide-react-native";
 import React from "react";
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -13,10 +19,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 const SlotInfo = () => {
+  const queryClient = useQueryClient();
   const router = useRouter();
+  const { userId } = useAuth();
   const { id } = useLocalSearchParams();
+
+  const { data: user } = useQuery({
+    queryKey: ["user", id],
+    queryFn: () => fetchUserById(userId as string),
+  });
 
   const { data: slot } = useQuery({
     queryKey: ["slot", id],
@@ -24,12 +38,67 @@ const SlotInfo = () => {
   });
 
   const { data: trainer } = useQuery({
-    queryKey: ["user", slot?.user_id],
+    queryKey: ["trainer", slot?.user_id],
     queryFn: () => fetchUserById(slot?.user_id as string),
     enabled: slot?.user_id != null,
   });
 
-  if (!slot) return;
+  const { data: slotBookingForUser } = useQuery({
+    queryKey: ["bookingsforslot", slot?.id, userId],
+    queryFn: () => fetchBookingsOfUserForSlot(slot.id, userId as string),
+    enabled: !!slot?.id && !!userId,
+  });
+
+  const bookSlotMutation = useMutation({
+    mutationKey: ["bookMutation"],
+    mutationFn: (slotId: number) => bookSlot(slotId, userId as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "bookingsforslot",
+          "user",
+          "slot",
+          "trainer",
+          slot.id,
+          userId,
+        ],
+      });
+      Alert.alert(
+        "Success",
+        "You have successfully booked this training slot!",
+      );
+    },
+    onError: () => {
+      Alert.alert(
+        "Booking Failed",
+        "Unable to book this slot. It may be full or you may have already booked it.",
+      );
+    },
+  });
+
+  const isDisabled =
+    (slotBookingForUser && slotBookingForUser?.length > 0) ||
+    slot?.current_bookings >= slot?.max_capacity ||
+    (user && user?.remaining_visits <= 0);
+
+  const renderButtonText = () => {
+    if (slotBookingForUser && slotBookingForUser?.length > 0) {
+      return "Already Booked";
+    } else if (slot?.current_bookings >= slot?.max_capacity) {
+      return "Out of space";
+    } else if (user && user?.remaining_visits <= 0) {
+      return "Out of visits";
+    } else {
+      return "Book a slot";
+    }
+  };
+
+  if (!slot)
+    return (
+      <View className="flex flex-col flex-1 justify-center items-center">
+        <ActivityIndicator />
+      </View>
+    );
 
   return (
     <View className="flex-1 p-4">
@@ -72,9 +141,13 @@ const SlotInfo = () => {
         </View>
         <Text className="text-lg my-4">{slot.description}</Text>
       </ScrollView>
-      <TouchableOpacity className="mb-4">
+      <TouchableOpacity
+        className="mb-4"
+        disabled={isDisabled}
+        onPress={() => bookSlotMutation.mutate(slot.id)}
+      >
         <LinearGradient
-          colors={["#4f46e5", "#7c3aed"]}
+          colors={isDisabled ? ["#c0c0c0", "#c9c9c9"] : ["#4f46e5", "#7c3aed"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
@@ -86,7 +159,9 @@ const SlotInfo = () => {
             borderRadius: 12,
           }}
         >
-          <Text className="text-lg text-white font-bold">Book a slot</Text>
+          <Text className="text-lg text-white font-bold">
+            {renderButtonText()}
+          </Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>

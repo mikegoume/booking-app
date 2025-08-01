@@ -58,7 +58,7 @@ const TrainingSlotEvent = ({ slot, user }: TrainingSlotEventPropTypes) => {
         <View className="flex-1">
           <Link asChild href={`./(modals)/slot/${slot.id}`}>
             <Text className="text-lg font-semibold text-slate-800 mb-1">
-              {slot.description}
+              {slot.title}
             </Text>
           </Link>
           <View className="flex-row items-center space-x-2 gap-2">
