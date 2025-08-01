@@ -26,7 +26,14 @@ export const fetchTimeSlots = async () => {
 export const fetchTimeSlotById = async (id: number) => {
   let { data: slot, error } = await supabase
     .from("slots")
-    .select("*")
+    .select(
+      `
+        *,
+        users (
+          name
+        )
+      `,
+    )
     .eq("id", id)
     .single();
 

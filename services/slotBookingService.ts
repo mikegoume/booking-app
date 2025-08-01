@@ -13,6 +13,19 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+export const fetchBookingsOfUser = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("slot_bookings")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  } else {
+    return data;
+  }
+};
+
 export const fetchBookingsOfUserForSlot = async (
   slotId: number,
   userId: string,
@@ -22,6 +35,7 @@ export const fetchBookingsOfUserForSlot = async (
     .select("*")
     .eq("slot_id", slotId)
     .eq("user_id", userId);
+
   if (error) {
     throw error;
   } else {

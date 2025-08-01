@@ -1,222 +1,351 @@
-import { useApp } from "@/contexts/AppContext";
-import { FlashList } from "@shopify/flash-list";
-import { Calendar as CalendarIcon, Clock, Users, X } from "lucide-react-native";
-import React from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+"use client";
 
-export default function BookingsScreen() {
-  const { user, bookings, cancelBooking } = useApp();
+import { StatusBar } from "expo-status-bar";
+import React, { useCallback, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  AgendaList,
+  CalendarProvider,
+  ExpandableCalendar,
+} from "react-native-calendars";
 
-  const userBookings = bookings.filter(
-    (booking) => booking.userId === user?.id && booking.status === "active",
+interface Event {
+  title: string;
+  data: {
+    id: string;
+    title: string;
+    time: string;
+    color: string;
+    description?: string;
+  }[];
+}
+
+const SAMPLE_EVENTS: Event[] = [
+  {
+    title: "2024-12-25",
+    data: [
+      {
+        id: "1",
+        title: "Christmas Day",
+        time: "All Day",
+        color: "#ff6b6b",
+        description: "Celebrate Christmas with family",
+      },
+    ],
+  },
+  {
+    title: "2024-12-31",
+    data: [
+      {
+        id: "2",
+        title: "New Year's Eve Party",
+        time: "8:00 PM",
+        color: "#4ecdc4",
+        description: "Ring in the new year!",
+      },
+    ],
+  },
+  {
+    title: "2025-01-01",
+    data: [
+      {
+        id: "3",
+        title: "New Year's Day",
+        time: "All Day",
+        color: "#45b7d1",
+        description: "Happy New Year!",
+      },
+    ],
+  },
+  {
+    title: "2025-01-15",
+    data: [
+      {
+        id: "4",
+        title: "Team Meeting",
+        time: "10:00 AM",
+        color: "#96ceb4",
+        description: "Weekly team sync",
+      },
+      {
+        id: "5",
+        title: "Lunch with Client",
+        time: "12:30 PM",
+        color: "#feca57",
+        description: "Business lunch at downtown restaurant",
+      },
+    ],
+  },
+  {
+    title: "2025-01-20",
+    data: [
+      {
+        id: "6",
+        title: "Doctor Appointment",
+        time: "2:00 PM",
+        color: "#ff9ff3",
+        description: "Annual checkup",
+      },
+    ],
+  },
+  {
+    title: "2025-01-25",
+    data: [
+      {
+        id: "7",
+        title: "Project Deadline",
+        time: "5:00 PM",
+        color: "#ff6b6b",
+        description: "Submit final project deliverables",
+      },
+    ],
+  },
+];
+
+export default function App() {
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
   );
 
-  const handleCancelBooking = (bookingId: string) => {
-    Alert.alert(
-      "Cancel Booking",
-      "Are you sure you want to cancel this booking? You will get your visit back.",
-      [
-        { text: "Keep Booking", style: "cancel" },
-        {
-          text: "Cancel Booking",
-          style: "destructive",
-          onPress: () => {
-            cancelBooking(bookingId);
-            Alert.alert(
-              "Booking Cancelled",
-              "Your booking has been cancelled and your visit has been refunded.",
-            );
-          },
-        },
-      ],
+  // Create marked dates object for the calendar
+  const markedDates = React.useMemo(() => {
+    const marked: any = {};
+    SAMPLE_EVENTS.forEach((section) => {
+      const date = section.title;
+      marked[date] = {
+        marked: true,
+        dots: section.data.map((event) => ({ color: event.color })),
+      };
+    });
+    return marked;
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: any }) => {
+    return (
+      <TouchableOpacity
+        style={styles.eventCard}
+        onPress={() =>
+          Alert.alert(item.title, item.description || "No description")
+        }
+      >
+        <View style={[styles.eventColorBar, { backgroundColor: item.color }]} />
+        <View style={styles.eventContent}>
+          <Text style={styles.eventTitle}>{item.title}</Text>
+          <Text style={styles.eventTime}>{item.time}</Text>
+          {item.description && (
+            <Text style={styles.eventDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
     );
+  }, []);
+
+  const renderEmptyDate = useCallback(() => {
+    return (
+      <View style={styles.emptyDate}>
+        <Text style={styles.emptyDateText}>No events scheduled</Text>
+        <Text style={styles.emptyDateSubtext}>
+          Tap &quot;Add Event&quot; to create one
+        </Text>
+      </View>
+    );
+  }, []);
+
+  const renderSectionHeader = useCallback(({ section }: { section: any }) => {
+    const date = new Date(section?.title);
+    const formattedDate = date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    return (
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionHeaderText}>{formattedDate}</Text>
+        <View style={styles.sectionHeaderLine} />
+      </View>
+    );
+  }, []);
+
+  const addEvent = () => {
+    Alert.alert("Add Event", `Add event for ${selectedDate}`);
+  };
+
+  const onDateChanged = (date: string) => {
+    setSelectedDate(date);
   };
 
   return (
-    <FlashList
-      ListEmptyComponent={() => (
-        <View style={styles.emptyState}>
-          <CalendarIcon size={64} color="#94a3b8" />
-          <Text style={styles.emptyStateTitle}>No bookings yet</Text>
-          <Text style={styles.emptyStateSubtitle}>
-            Browse available training slots to make your first booking
-          </Text>
-        </View>
-      )}
-      contentContainerStyle={{ padding: 16, paddingTop: 0 }}
-      data={userBookings}
-      renderItem={({ item }) => {
-        return (
-          <View key={item.id} style={styles.bookingCard}>
-            <View style={styles.bookingHeader}>
-              <View style={styles.bookingInfo}>
-                <Text style={styles.bookingDate}>
-                  {new Date(item.slot.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </Text>
-                <View style={styles.timeContainer}>
-                  <Clock size={16} color="#64748b" />
-                  <Text style={styles.bookingTime}>
-                    {item.slot.startTime} - {item.slot.endTime}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => handleCancelBooking(item.id)}
-              >
-                <X size={20} color="#ef4444" />
-              </TouchableOpacity>
-            </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
 
-            {item.slot.description && (
-              <Text style={styles.bookingDescription}>
-                {item.slot.description}
-              </Text>
-            )}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Calendar</Text>
+        <TouchableOpacity style={styles.addButton} onPress={addEvent}>
+          <Text style={styles.addButtonText}>+ Add Event</Text>
+        </TouchableOpacity>
+      </View>
 
-            <View style={styles.bookingFooter}>
-              <Text style={styles.trainerName}>
-                with {item.slot.trainerName}
-              </Text>
-              <View style={styles.capacityContainer}>
-                <Users size={16} color="#64748b" />
-                <Text style={styles.capacityText}>
-                  {item.slot.currentBookings}/{item.slot.maxCapacity}
-                </Text>
-              </View>
-            </View>
+      <CalendarProvider date={selectedDate} onDateChanged={onDateChanged}>
+        <ExpandableCalendar
+          firstDay={1}
+          markedDates={markedDates}
+          markingType="multi-dot"
+          theme={{
+            backgroundColor: "#ffffff",
+            calendarBackground: "#ffffff",
+            textSectionTitleColor: "#b6c1cd",
+            selectedDayBackgroundColor: "#007AFF",
+            selectedDayTextColor: "#ffffff",
+            todayTextColor: "#007AFF",
+            dayTextColor: "#2d4150",
+            textDisabledColor: "#d9e1e8",
+            dotColor: "#00adf5",
+            selectedDotColor: "#ffffff",
+            arrowColor: "#007AFF",
+            disabledArrowColor: "#d9e1e8",
+            monthTextColor: "#2d4150",
+            indicatorColor: "#007AFF",
+            textDayFontFamily: "System",
+            textMonthFontFamily: "System",
+            textDayHeaderFontFamily: "System",
+            textDayFontWeight: "400",
+            textMonthFontWeight: "600",
+            textDayHeaderFontWeight: "600",
+            textDayFontSize: 16,
+            textMonthFontSize: 18,
+            textDayHeaderFontSize: 14,
+          }}
+        />
 
-            <View style={styles.bookingMeta}>
-              <Text style={styles.bookedAt}>
-                Booked on {new Date(item.bookedAt).toLocaleDateString()}
-              </Text>
-            </View>
-          </View>
-        );
-      }}
-      estimatedItemSize={37}
-      showsVerticalScrollIndicator={false}
-    />
+        <AgendaList
+          sections={SAMPLE_EVENTS}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          sectionStyle={styles.section}
+          dayFormat="yyyy-MM-dd"
+          showClosingKnob={true}
+          scrollToNextEvent={true}
+          avoidDateUpdates={false}
+          renderEmptyData={renderEmptyDate}
+        />
+      </CalendarProvider>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#f8f9fa",
   },
   header: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontFamily: "Inter-SemiBold",
-    color: "#1e293b",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  bookingCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  bookingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e9ecef",
   },
-  bookingInfo: {
-    flex: 1,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#2d4150",
   },
-  bookingDate: {
+  addButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  addButtonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  section: {
+    backgroundColor: "#f8f9fa",
+    paddingTop: 20,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: "#f8f9fa",
+  },
+  sectionHeaderText: {
     fontSize: 18,
-    fontFamily: "Inter-SemiBold",
-    color: "#1e293b",
+    fontWeight: "600",
+    color: "#2d4150",
+    marginRight: 12,
+  },
+  sectionHeaderLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e9ecef",
+  },
+  eventCard: {
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
+    marginHorizontal: 20,
+    marginVertical: 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  eventColorBar: {
+    width: 4,
+  },
+  eventContent: {
+    flex: 1,
+    padding: 16,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2d4150",
+    marginBottom: 4,
+  },
+  eventTime: {
+    fontSize: 14,
+    color: "#007AFF",
+    fontWeight: "500",
     marginBottom: 6,
   },
-  timeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  bookingTime: {
+  eventDescription: {
     fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: "#64748b",
-  },
-  cancelButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: "#fef2f2",
-  },
-  bookingDescription: {
-    fontSize: 14,
-    fontFamily: "Inter-Regular",
-    color: "#64748b",
+    color: "#6c757d",
     lineHeight: 20,
-    marginBottom: 16,
   },
-  bookingFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  emptyDate: {
     alignItems: "center",
-    marginBottom: 12,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
-  trainerName: {
+  emptyDateText: {
+    fontSize: 16,
+    color: "#6c757d",
+    marginBottom: 4,
+  },
+  emptyDateSubtext: {
     fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: "#475569",
-  },
-  capacityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#f1f5f9",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  capacityText: {
-    fontSize: 14,
-    fontFamily: "Inter-SemiBold",
-    color: "#475569",
-  },
-  bookingMeta: {
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
-  },
-  bookedAt: {
-    fontSize: 12,
-    fontFamily: "Inter-Regular",
-    color: "#94a3b8",
+    color: "#adb5bd",
   },
 });
